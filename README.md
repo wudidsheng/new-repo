@@ -1,3 +1,4 @@
-# new-repo
+# AI生成Logo
 
-Initial commit
+## 技术
+`nextjs` `Tailwind Css` `Gemini API` `Hugging` `Face APi`
