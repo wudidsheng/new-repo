@@ -1,4 +1,12 @@
+"use client";
 import { Button } from "@/components/ui/button";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -10,8 +18,22 @@ function Header() {
         <Image src="/logo.svg" alt="logo" height={60} width={30}></Image>
         <h3 className="text-3xl italic font-bold">AI-LOGO</h3>
       </Link>
-
-      <Button className="cursor-pointer">立即开始</Button>
+      <div className="flex items-center gap-1.5">
+        <SignedOut>
+          <SignInButton fallbackRedirectUrl="/">
+            <Button className="cursor-pointer ">登录</Button>
+          </SignInButton>
+          <SignUpButton>
+            <Button className="cursor-pointer">注册</Button>
+          </SignUpButton>
+        </SignedOut>
+        <SignedIn>
+          <Button className="cursor-pointer mr-3">
+            <a href="#start"> 立即开始</a>
+          </Button>
+          <UserButton />
+        </SignedIn>
+      </div>
     </div>
   );
 }

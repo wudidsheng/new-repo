@@ -108,7 +108,7 @@ export function LogoCard({ files }: { files: string[] }) {
           />
         );
       case 6:
-        return <LogoModel />;
+        return <LogoModel data={formdata} />;
       default:
         return null;
     }

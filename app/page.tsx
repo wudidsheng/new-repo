@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import Form from "next/form";
 import { useActionState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+
 type Ierror = {
   name?: string;
 };
@@ -43,10 +44,16 @@ export default function Home() {
       >
         <input
           name="name"
+          id="start"
           placeholder="输入你的logo名称"
           className={`p-2 border-1 border-gray-100 rounded-md w-full hover:border-primary shadow-sm `}
         ></input>
-        <Button className="cursor-pointer" type="submit" disabled={isPending}>
+        <Button
+          id="start"
+          className="cursor-pointer"
+          type="submit"
+          disabled={isPending}
+        >
           立即开始
         </Button>
       </Form>
