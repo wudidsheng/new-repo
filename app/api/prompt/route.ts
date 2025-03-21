@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   const body: Inform = await req.json();
   const data = schema.parse(body);
   console.log(data);
-  debugger;
+
   const { name, color, style, description, ideal } = data;
   let word = `帮我生成一个提示词，用来生成一个张图片，请你描绘更多的细节给我，我提供了以下元素,图片的主体是${name},图片的描述是${description},图片的颜色是${color},图片风格是${style}`;
   if (ideal?.description) {
