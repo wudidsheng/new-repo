@@ -1,10 +1,17 @@
-import React from "react";
+"use client";
+import React, { useCallback, useEffect } from "react";
 import { Inform } from "./LogoCard";
 import Image from "next/image";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
+export const LOCAL_SAVE_KEY = "LOCAL_SAVE_KEY";
 export default function LogoModel({ data }: { data: Inform }) {
-  console.log(data);
+  const localSave = useCallback(() => {
+    localStorage.setItem(LOCAL_SAVE_KEY, JSON.stringify(data));
+  }, [data]);
+
   return (
     <>
       <div className="my-5">
@@ -22,7 +29,20 @@ export default function LogoModel({ data }: { data: Inform }) {
           <div className="text-xl pt-2 pb-5 w-full text-left">
             有限的设计选项和质量
           </div>
-          <Button className="cursor-pointer">立即开始</Button>
+          <SignedIn>
+            <Link href={"/generate-logo?type=free"}>
+              <Button onClick={localSave} className="cursor-pointer">
+                立即开始
+              </Button>
+            </Link>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal" forceRedirectUrl="/generate-logo">
+              <Button onClick={localSave} className="cursor-pointer">
+                前往登陆
+              </Button>
+            </SignInButton>
+          </SignedOut>
         </div>
         <div className="border-1 border-gray-200 p-4 flex flex-col items-center rounded-xl gap-3 ">
           <Image
@@ -39,7 +59,20 @@ export default function LogoModel({ data }: { data: Inform }) {
           <div className="text-xl pt-2 pb-5 w-full text-left">
             更高的清晰度和质量
           </div>
-          <Button className="cursor-pointer">立即开始</Button>
+          <SignedIn>
+            <Link href={"/generate-logo?type=permium"}>
+              <Button className="cursor-pointer" onClick={localSave}>
+                立即开始
+              </Button>
+            </Link>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal" forceRedirectUrl="/generate-logo">
+              <Button className="cursor-pointer" onClick={localSave}>
+                前往登陆
+              </Button>
+            </SignInButton>
+          </SignedOut>
         </div>
       </div>
     </>

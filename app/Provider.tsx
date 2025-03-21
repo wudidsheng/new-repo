@@ -8,14 +8,17 @@ import React, {
 import Header from "./_components/Header";
 import { useUser } from "@clerk/nextjs";
 
-const UserContext = React.createContext({});
+export const UserContext = React.createContext<{
+  userInfo?: Record<string, string>;
+  checkUser?: () => void;
+}>({});
 export default function Provider({ children }: PropsWithChildren) {
   const [userInfo, setUserInfo] = useState();
   const { user } = useUser();
 
   const checkUser = useCallback(async () => {
     const body = {
-      name: user?.fullName,
+      name: user?.username,
       clerkId: user?.id,
       email: user?.primaryEmailAddress?.emailAddress,
     };
