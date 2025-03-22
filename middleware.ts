@@ -6,7 +6,7 @@ const isProtectedRoute = createRouteMatcher(["/generate-logo"]);
 export default clerkMiddleware(async (auth, req) => {
   const user = await auth();
   if (isProtectedRoute(req) && !user.userId) {
-    // auth.protect();
+    auth.protect();
   }
 
 });

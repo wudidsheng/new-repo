@@ -48,12 +48,13 @@ export async function POST(req: NextRequest) {
       },
       {
         role: "user",
-        content: `用json格式返回。字段为prompt`,
+        content: `返回内容翻译成英文,再用json格式返回。字段为prompt`,
       },
     ],
   });
   try {
     const choices = completion.choices[0]?.message?.content;
+
     const cleanedJson = choices!
       .replace(/^```json\n|\n```$/g, "")
       .replace(/\\"/g, '"');
