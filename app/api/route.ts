@@ -1,3 +1,4 @@
+import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { z } from "zod";

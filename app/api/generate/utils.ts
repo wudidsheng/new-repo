@@ -1,8 +1,49 @@
+import { currentUser } from "@clerk/nextjs/server";
 import fs from "fs";
-import http from "http";
+import https from "https";
+import path from "path";
+import crypto from "crypto";
+import { recordCollection } from "@/db/record";
+import { userCollection } from "@/db/user";
 const apiKey = process.env.GEMINI_API_KEY;
 
+async function downloadFile(url: string, outputPath: string) {
+  await new Promise((resolve, reject) => {
+    const ext = path.extname(new URL(url).pathname);
+    const pathName = `${outputPath}${ext}`;
+    const fileExists = fs.existsSync(pathName);
+    if (!fileExists) {
+      console.error("File not found:", pathName);
+    }
+    const file = fs.createWriteStream(`${pathName}`);
+
+    https
+      .get(url, (response) => {
+        if (response.statusCode !== 200) {
+          console.error(`下载失败，状态码: ${response.statusCode}`);
+          reject(response);
+        }
+
+        response.pipe(file);
+
+        file.on("finish", () => {
+          file.close();
+          resolve(file);
+        });
+      })
+      .on("error", (err) => {
+        console.error(`下载出错: ${err.message}`);
+        reject(err);
+      });
+  });
+}
+
 export async function getFreeImage(data: string) {
+  const user = await currentUser();
+  if (!fs.existsSync(`./public/${user!.id}`)) {
+    fs.mkdirSync(`./public/${user!.id}`, { recursive: true });
+  }
+
   const response = await fetch(
     `https://proxyi.927367.xyz/proxy/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${apiKey}`,
     {
@@ -27,16 +68,33 @@ export async function getFreeImage(data: string) {
       console.log(part.text);
     } else if (part.inlineData) {
       const imageData = part.inlineData.data;
+      const imageName =
+        crypto.createHash("sha256", imageData).digest("hex") + Date.now();
       const buffer = Buffer.from(imageData, "base64");
-      //图片生成完毕
-      //TODO:文件命名
-      fs.writeFileSync("./public/gemini-native-image.png", buffer);
+      fs.writeFileSync(`./public/${user!.id}/${imageName}.png`, buffer);
+      // 更新用户信息
+      await userCollection.updateOne(
+        { clerkId: user?.id },
+        {
+          $inc: { integral: -1 },
+        }
+      );
+      await recordCollection.insertOne({
+        clerkId: user?.id,
+        imageName: `/public/${user!.id}/${imageName}.png`,
+      });
+      return { data: `/public/${user!.id}/${imageName}.png` };
     }
   }
-  return result;
+  return { error: "图片生成错误" };
 }
 
 export async function getFreeImageByToken(data: string) {
+  const user = await currentUser();
+  if (!fs.existsSync(`./public/${user!.id}`)) {
+    fs.mkdirSync(`./public/${user!.id}`, { recursive: true });
+  }
+
   const request = await fetch("https://api.deerapi.com/v1/images/generations", {
     method: "POST",
     body: JSON.stringify({
@@ -52,18 +110,29 @@ export async function getFreeImageByToken(data: string) {
   });
   const result = await request.json();
   const image = result.data![0];
-  http.get(image?.url, (res) => {
-    let imgData = "";
-    res.setEncoding("binary"); // 下载图片需要设置为 binary, 否则图片会打不开
 
-    res.on("data", (chunk) => {
-      imgData += chunk;
-    });
+  if (image?.url) {
+    const imageName =
+      crypto.createHash("sha256").update(image.url).digest("hex").slice(0, 24) +
+      Date.now();
 
-    res.on("end", () => {
-      fs.writeFileSync("./download.png", imgData, "binary");
-      //TODO:文件命名
-      return Promise.resolve("/");
+    const file = await downloadFile(
+      image?.url,
+      `./public/${user!.id}/${imageName}`
+    );
+    // 更新用户信息
+    await userCollection.updateOne(
+      { clerkId: user?.id },
+      {
+        $inc: { good: -1 },
+      }
+    );
+    await recordCollection.insertOne({
+      clerkId: user?.id,
+      imageName: file,
     });
-  });
+    return { data: file };
+  }
+
+  return { error: "图片生成错误" };
 }

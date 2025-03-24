@@ -17,6 +17,7 @@ export default function Provider({ children }: PropsWithChildren) {
   const { user } = useUser();
 
   const checkUser = useCallback(async () => {
+    if (!user?.id) return;
     const body = {
       name: user?.username,
       clerkId: user?.id,
@@ -31,7 +32,7 @@ export default function Provider({ children }: PropsWithChildren) {
   }, [user]);
 
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       checkUser();
     }
   }, [checkUser, user]);

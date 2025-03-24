@@ -1,4 +1,5 @@
 import { Inform } from "@/app/create/_components/LogoCard";
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { z } from "zod";
@@ -25,14 +26,17 @@ const schema = z.object({
     .optional(),
 });
 export async function POST(req: NextRequest) {
+  const { userId } = await auth();
+  if (!userId) {
+    return new Response("Unauthorized", { status: 401 });
+  }
   const body: Inform = await req.json();
   const data = schema.parse(body);
-  console.log(data);
 
-  const { name, color, style, description, ideal } = data;
+  const { name, color, style, description } = data;
   let word = `帮我生成一个提示词，用来生成一个张图片，请你描绘更多的细节给我，我提供了以下元素,图片的主体是${name},图片的描述是${description},图片的颜色是${color},图片风格是${style}`;
-  if (ideal?.description) {
-    word = word + `我的构图思路是${ideal?.description}`;
+  if (data?.ideal?.description) {
+    word = word + `我的构图思路是${data?.ideal?.description}`;
   }
 
   const completion = await client.chat.completions.create({
@@ -52,15 +56,20 @@ export async function POST(req: NextRequest) {
       },
     ],
   });
-  try {
-    const choices = completion.choices[0]?.message?.content;
 
-    const cleanedJson = choices!
-      .replace(/^```json\n|\n```$/g, "")
-      .replace(/\\"/g, '"');
-    const parsedData = JSON.parse(cleanedJson);
+  const choices = completion.choices[0]?.message?.content;
+  const cleanedJson = choices!
+    .replace(/^```json\n|\n```$/g, "")
+    .replace(/\\"/g, '"');
+  try {
+    const parsedData = JSON.parse(`${cleanedJson}`);
     return Response.json(parsedData);
   } catch (error) {
-    return Response.json({ message: error }, { status: 500 });
+    console.log(error);
+    const match = cleanedJson.match(/\{[\s\S]*?\}/);
+    if (match?.[0]) {
+      return Response.json(JSON.parse(match[0]));
+    }
+    return Response.json({ error: "解析出错" }, { status: 400 });
   }
 }
