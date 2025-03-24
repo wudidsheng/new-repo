@@ -15,7 +15,7 @@ export const UserContext = React.createContext<{
 export default function Provider({ children }: PropsWithChildren) {
   const [userInfo, setUserInfo] = useState();
   const { user } = useUser();
-
+  console.log(userInfo);
   const checkUser = useCallback(async () => {
     if (!user?.id) return;
     const body = {

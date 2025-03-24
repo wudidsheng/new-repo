@@ -3,6 +3,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // 保护路由
 const isProtectedRoute = createRouteMatcher([
   "/generate-logo",
+  "/dashboard"
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

@@ -125,3 +125,42 @@
 .layout {
   @apply px-10 lg:px-32 xl:px-48 2xl:px-56;
 }
+
+.loader {
+  display: block;
+  position: relative;
+  height: 12px;
+  width: 80%;
+  border: 1px solid #aaa8a8;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.loader::after {
+  content: "";
+  width: 40%;
+  height: 100%;
+  background: #ff3d00;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  animation: animloader 2s linear infinite;
+}
+
+@keyframes animloader {
+  0% {
+    left: 0;
+    transform: translateX(-100%);
+  }
+  100% {
+    left: 100%;
+    transform: translateX(0%);
+  }
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none; /* 适用于 IE 和 Edge */
+  scrollbar-width: none; /* 适用于 Firefox */
+}

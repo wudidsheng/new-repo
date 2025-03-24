@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { recordCollection } from "@/db/record";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { z } from "zod";
@@ -45,4 +45,17 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     return Response.json({ message: error }, { status: 500 });
   }
+}
+
+export async function GET(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  const id = searchParams.get("id");
+  if (id) {
+    const myData = await recordCollection
+      .find({ clerkId: id })
+      .sort({ _id: -1 });
+    return Response.json(myData);
+  }
+  const data = await recordCollection.find({}).limit(12).sort({ _id: -1 });
+  return Response.json(data);
 }

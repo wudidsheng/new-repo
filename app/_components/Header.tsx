@@ -28,9 +28,10 @@ function Header() {
           </SignUpButton>
         </SignedOut>
         <SignedIn>
-          <Button className="cursor-pointer mr-3">
-            <a href="#start"> 立即开始</a>
-          </Button>
+          <Link href="/dashboard">
+            <Button className="cursor-pointer mr-3">Dashboard</Button>
+          </Link>
+
           <UserButton />
         </SignedIn>
       </div>

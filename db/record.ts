@@ -6,6 +6,8 @@ const recordSchema = new mongoose.Schema({
     type: String,
   },
   imageName: { type: String },
+  name: { type: String },
+  description: { type: String },
 });
 
 const recordCollection =

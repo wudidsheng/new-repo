@@ -1,13 +1,17 @@
 "use client";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useContext } from "react";
 import { Inform } from "./LogoCard";
 import Image from "next/image";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { UserContext } from "@/app/Provider";
+import { Badge } from "@/components/ui/badge";
 
 export const LOCAL_SAVE_KEY = "LOCAL_SAVE_KEY";
 export default function LogoModel({ data }: { data: Inform }) {
+  const { userInfo } = useContext(UserContext);
+
   const localSave = useCallback(() => {
     localStorage.setItem(LOCAL_SAVE_KEY, JSON.stringify(data));
   }, [data]);
@@ -21,19 +25,23 @@ export default function LogoModel({ data }: { data: Inform }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 ">
         <div className="border-1 border-gray-200 p-4 flex flex-col items-center rounded-xl gap-3 ">
           <Image src={"/free.svg"} alt="free" width={60} height={60}></Image>
-          <div className="text-xl pt-5 w-full text-left">免费生成 logo</div>
-          <div className="text-xl pt-2 w-full text-left">等待时间更长</div>
+          <div className="text-xl pt-5 w-full text-left">
+            GoogGemini生成 logo
+          </div>
+          <div className="text-xl pt-2 w-full text-left">只有 5 次</div>
           <div className="text-xl pt-2 w-full text-left">
-            等待时间:30 秒到 3 分钟
+            生成贴近你想法的图片
           </div>
           <div className="text-xl pt-2 pb-5 w-full text-left">
             有限的设计选项和质量
           </div>
           <SignedIn>
             <Link href={"/generate-logo?type=free"}>
-              <Button onClick={localSave} className="cursor-pointer">
-                立即开始
-              </Button>
+              <Badge>
+                <Button onClick={localSave} className="cursor-pointer">
+                  立即开始
+                </Button>{" "}
+              </Badge>
             </Link>
           </SignedIn>
           <SignedOut>
@@ -51,19 +59,22 @@ export default function LogoModel({ data }: { data: Inform }) {
             height={60}
             width={60}
           ></Image>
-          <div className="text-xl pt-5 w-full text-left">更短的等待时间</div>
           <div className="text-xl pt-2 w-full text-left">
             等待时间:小于 10 秒
           </div>
-          <div className="text-xl pt-2 w-full text-left">只有 5 次</div>
+          <div className="text-xl pt-2 w-full text-left">只有 2 次</div>
+          <div className="text-xl pt-5 w-full text-left">更加符合你想法</div>
+
           <div className="text-xl pt-2 pb-5 w-full text-left">
             更高的清晰度和质量
           </div>
           <SignedIn>
             <Link href={"/generate-logo?type=permium"}>
-              <Button className="cursor-pointer" onClick={localSave}>
-                立即开始
-              </Button>
+              <Badge>
+                <Button className="cursor-pointer" onClick={localSave}>
+                  立即开始
+                </Button>
+              </Badge>
             </Link>
           </SignedIn>
           <SignedOut>

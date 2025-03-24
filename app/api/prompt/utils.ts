@@ -38,7 +38,11 @@ async function downloadFile(url: string, outputPath: string) {
   });
 }
 
-export async function getFreeImage(data: string) {
+export async function getFreeImage(
+  data: string,
+  name: string,
+  description: string
+) {
   const user = await currentUser();
   if (!fs.existsSync(`./public/${user!.id}`)) {
     fs.mkdirSync(`./public/${user!.id}`, { recursive: true });
@@ -81,15 +85,21 @@ export async function getFreeImage(data: string) {
       );
       await recordCollection.insertOne({
         clerkId: user?.id,
-        imageName: `/public/${user!.id}/${imageName}.png`,
+        imageName: `/${user!.id}/${imageName}.png`,
+        name: name,
+        description: description,
       });
-      return { data: `/public/${user!.id}/${imageName}.png` };
+      return { data: `/${user!.id}/${imageName}.png` };
     }
   }
   return { error: "图片生成错误" };
 }
 
-export async function getFreeImageByToken(data: string) {
+export async function getFreeImageByToken(
+  data: string,
+  name: string,
+  description: string
+) {
   const user = await currentUser();
   if (!fs.existsSync(`./public/${user!.id}`)) {
     fs.mkdirSync(`./public/${user!.id}`, { recursive: true });
@@ -115,7 +125,8 @@ export async function getFreeImageByToken(data: string) {
     const imageName =
       crypto.createHash("sha256").update(image.url).digest("hex").slice(0, 24) +
       Date.now();
-
+    const ext = path.extname(new URL(image?.url).pathname);
+    const pathName = `/${user!.id}/${imageName}${ext}`;
     const file = await downloadFile(
       image?.url,
       `./public/${user!.id}/${imageName}`
@@ -129,10 +140,43 @@ export async function getFreeImageByToken(data: string) {
     );
     await recordCollection.insertOne({
       clerkId: user?.id,
-      imageName: file,
+      imageName: pathName,
+      name: name,
+      description: description,
     });
     return { data: file };
   }
 
   return { error: "图片生成错误" };
+}
+
+export async function getImageByType(
+  type: string,
+  prompt: string,
+  userId: string,
+  name: string,
+  description: string
+) {
+  const userInfo = await userCollection.findOne({ clerkId: userId });
+  if (type === "free") {
+    if (userInfo?.integral <= 0) {
+      return Response.json({ error: "体验次数已到上限" }, { status: 400 });
+    }
+    try {
+      const data = await getFreeImage(prompt, name, description);
+      return Response.json(data);
+    } catch (error) {
+      return Response.json(error, { status: 400 });
+    }
+  } else {
+    if (userInfo?.good <= 0) {
+      return Response.json({ error: "体验次数已到上限" }, { status: 400 });
+    }
+    try {
+      const data = await getFreeImageByToken(description, name, description);
+      return Response.json(data);
+    } catch (error) {
+      return Response.json(error, { status: 400 });
+    }
+  }
 }

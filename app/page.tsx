@@ -1,8 +1,9 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Form from "next/form";
-import { useActionState, useCallback } from "react";
+import { useActionState, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ImageCard, IRecord } from "./_components/ImageCard";
 
 type Ierror = {
   name?: string;
@@ -11,6 +12,7 @@ type Ierror = {
 export default function Home() {
   const router = useRouter();
   const initialState: Ierror = {};
+  const [imgList, setImagList] = useState<IRecord[]>([]);
 
   const createAction = useCallback(
     (_prev: Ierror | undefined, formData: FormData): Ierror | undefined => {
@@ -30,6 +32,16 @@ export default function Home() {
     FormData
   >(createAction, initialState);
 
+  useEffect(() => {
+    fetch("/api", { method: "GET" })
+      .then((res) => res.json())
+      .then((data) => {
+        setImagList(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
   return (
     <div className="mt-32 flex flex-col items-center gap-5">
       <h1 className="text-5xl text-primary mb-4 font-bold">AI 图标制作器</h1>
@@ -58,6 +70,7 @@ export default function Home() {
         </Button>
       </Form>
       {error?.name && <span className="text-red-700">{error.name}</span>}`
+      <ImageCard list={imgList} />
     </div>
   );
 }

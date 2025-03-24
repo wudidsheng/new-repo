@@ -3,6 +3,9 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { z } from "zod";
+import { getImageByType } from "./utils";
+import crypto from "crypto";
+let nexRequest = "";
 
 const client = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
@@ -18,6 +21,7 @@ const schema = z.object({
   color: z.string(),
   style: z.string(),
   description: z.string().optional(),
+  type: z.string(),
   ideal: z
     .object({
       name: z.string().optional(),
@@ -30,10 +34,15 @@ export async function POST(req: NextRequest) {
   if (!userId) {
     return new Response("Unauthorized", { status: 401 });
   }
+  const requestHash = crypto.createHash("sha256", req).digest("hex");
   const body: Inform = await req.json();
+  if (nexRequest === requestHash) {
+    return new Response("server busy", { status: 500 });
+  }
+  nexRequest = requestHash;
   const data = schema.parse(body);
 
-  const { name, color, style, description } = data;
+  const { name, color, style, description, type } = data;
   let word = `帮我生成一个提示词，用来生成一个张图片，请你描绘更多的细节给我，我提供了以下元素,图片的主体是${name},图片的描述是${description},图片的颜色是${color},图片风格是${style}`;
   if (data?.ideal?.description) {
     word = word + `我的构图思路是${data?.ideal?.description}`;
@@ -61,15 +70,25 @@ export async function POST(req: NextRequest) {
   const cleanedJson = choices!
     .replace(/^```json\n|\n```$/g, "")
     .replace(/\\"/g, '"');
+  let prompt = "";
   try {
     const parsedData = JSON.parse(`${cleanedJson}`);
-    return Response.json(parsedData);
+    prompt = parsedData.prompt;
   } catch (error) {
     console.log(error);
     const match = cleanedJson.match(/\{[\s\S]*?\}/);
     if (match?.[0]) {
-      return Response.json(JSON.parse(match[0]));
+      prompt = JSON.parse(match[0])?.prompt;
     }
-    return Response.json({ error: "解析出错" }, { status: 400 });
   }
+  if (!prompt) return Response.json({ error: "解析出错" }, { status: 400 });
+  const ResPonseData = await getImageByType(
+    type,
+    prompt,
+    userId,
+    name,
+    description || "暂无无描述"
+  );
+  nexRequest = "";
+  return ResPonseData;
 }
