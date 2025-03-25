@@ -1,25 +1,12 @@
 # AI生成Logo
  根据你的喜好在线生成Logo。
 ## 技术
-`nextjs` `Tailwind Css` `Gemini API` `Hugging` `Face APi`
+`nextjs` `Tailwind Css` `Gemini API` `Clerk` `mongodb`
 
-
-
-
-**UI框架**  
-[UI.shadcn](https://ui.shadcn.com/)
-
-![alt text](image.png)
-
-自定义字体
-
-## 身份认证
-**clerk**
-
-
-保护路由
-
-判断登录
-    useuser
-存储到本地数据库
+## 说明
+ 在线生成图片。根据用户的输入生成提示词语。生成符合用户预期的图片。    
+用户可以免费使用5次`gemini`生成图片。可以免费使用 `deerapi` 生成两次图片
     
+<video id="video" controls="" preload="none" poster="封面">
+      <source id="mp4" src="使用.mp4" type="video/mp4">
+</videos>
