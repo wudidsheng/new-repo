@@ -60,7 +60,7 @@ export default function LogoModel({ data }: { data: Inform }) {
             width={60}
           ></Image>
           <div className="text-xl pt-2 w-full text-left">
-            等待时间:小于 10 秒
+          deerapi生成logo
           </div>
           <div className="text-xl pt-2 w-full text-left">只有 2 次</div>
           <div className="text-xl pt-5 w-full text-left">更加符合你想法</div>
