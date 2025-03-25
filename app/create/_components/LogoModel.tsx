@@ -1,17 +1,14 @@
 "use client";
-import React, { useCallback, useContext } from "react";
+import React, { useCallback } from "react";
 import { Inform } from "./LogoCard";
 import Image from "next/image";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { UserContext } from "@/app/Provider";
 import { Badge } from "@/components/ui/badge";
 
 export const LOCAL_SAVE_KEY = "LOCAL_SAVE_KEY";
 export default function LogoModel({ data }: { data: Inform }) {
-  const { userInfo } = useContext(UserContext);
-
   const localSave = useCallback(() => {
     localStorage.setItem(LOCAL_SAVE_KEY, JSON.stringify(data));
   }, [data]);
@@ -59,9 +56,7 @@ export default function LogoModel({ data }: { data: Inform }) {
             height={60}
             width={60}
           ></Image>
-          <div className="text-xl pt-2 w-full text-left">
-          deerapi生成logo
-          </div>
+          <div className="text-xl pt-2 w-full text-left">deerapi生成logo</div>
           <div className="text-xl pt-2 w-full text-left">只有 2 次</div>
           <div className="text-xl pt-5 w-full text-left">更加符合你想法</div>
 
