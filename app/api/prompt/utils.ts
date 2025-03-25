@@ -8,7 +8,7 @@ import { userCollection } from "@/db/user";
 const apiKey = process.env.GEMINI_API_KEY;
 
 async function downloadFile(url: string, outputPath: string) {
-  await new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const ext = path.extname(new URL(url).pathname);
     const pathName = `${outputPath}${ext}`;
     const fileExists = fs.existsSync(pathName);
@@ -27,6 +27,7 @@ async function downloadFile(url: string, outputPath: string) {
         response.pipe(file);
 
         file.on("finish", () => {
+          console.log(file);
           file.close();
           resolve(file);
         });
@@ -131,6 +132,7 @@ export async function getFreeImageByToken(
       image?.url,
       `./public/${user!.id}/${imageName}`
     );
+    console.log(file?.path, "===");
     // 更新用户信息
     await userCollection.updateOne(
       { clerkId: user?.id },
